@@ -84,6 +84,7 @@ bypass:
 | `tools/check-shaders.sh` | glslc on the dumped shaders; verify.sh and CI both call it. |
 | `tools/sweep.py` | No control is silently dead. |
 | `tools/verify.sh` | All of it, at two rasters, plus the release-time checks done locally. |
+| `demo/` | The browser demo: `plugin.js` holds the plugin's ten shader bodies verbatim (assembled as `Shaders.cpp` assembles them) and a hand PORT of the CPU half (`Controls.cpp`, `Model.h`'s `GeometryOf`/`EchoTaps`/`PhaserWindow`, the per-frame arithmetic and pass order of `Databend::ProcessOpenGL`); `tools/check_shaders.py` keeps the shaders identical (verify.sh runs it); `vendor/` is the shared kit from `stoatworks-backend/resolume-demo` (never edit it, re-run `sync.sh`). Served by this repo's own Worker at `databend-demo.stoatworks-labs.com` through a DNS record + route (the zone is out of custom domains); `deploy.yml` redeploys it on a push to main. The four integer controls are dropdowns there (the kit has no integer type). The port reproduces `dbtest --window`'s table and the 207-sample default window; on the same 960×540 colour-bars frame the page and `dbtest --pipe` agree on every pixel exactly (echo, export, three layouts) and within 1/255 with the pitch shifter on, measured once 2026-09-24 with the two LFO effects off (their phase rides on a frame counter the page and the pipe do not share). |
 
 Per frame: the stream pass writes the file into an R32F buffer (Stride × Rows
 texels, one per sample); each effect that is on reads one stream buffer and
@@ -392,7 +393,9 @@ Release build, at 320×180 and 1280×720.
   each, at two rasters, for the defaults. Nothing has been through a show.
 - **Not verified at 4K**, only benchmarked there.
 - **The float part of the `--allpass` tolerances is a model**, said above.
-- **No OpenFX port, no browser demo, no user guide, no factory presets.**
+- **No OpenFX port, no user guide, no factory presets.** The browser demo's CPU
+  half is a port that only a reader checks; its shaders are held to the C++ by
+  `check_shaders.py`.
 
 ---
 

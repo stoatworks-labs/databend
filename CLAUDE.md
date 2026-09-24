@@ -55,6 +55,10 @@ control laws or the harness's tolerances.
 - No dead controls: `python3 tools/sweep.py` (`--size WxH`, `--jobs N`)
 - Render cost: `./build/dbtest --bench` (best of three; the GPU is shared, so run it twice)
 - What a host sees: `~/Projects/resolume/oxbow/build/oxbow probe build-universal/Databend.bundle`
+- The browser demo's shaders are the plugin's, character for character: `python3 demo/tools/check_shaders.py`
+  (in verify.sh). The demo's CPU half (`demo/plugin.js`) is a hand port; only a reader checks it.
+- Deploy the demo: `cf-run npx wrangler deploy` from the repo root (a push to main also deploys it);
+  verify by content: `curl -s 'https://databend-demo.stoatworks-labs.com/?cb=1' | grep -o '<title>[^<]*'`
 
 ## Notes
 - **The shaders ARE the effects.** Each effect lives once, in GLSL (`Shaders.cpp`);
@@ -100,7 +104,7 @@ control laws or the harness's tolerances.
   plus an `oxbow` load. Footage only through `--pipe` (the defaults were judged on
   Resolume's bundled demo clips that way).
 - No Windows build has run; no Arena gate; no release, no website, no user guide.
-- No OpenFX port, no browser demo, no factory presets, no audio input.
+- No OpenFX port, no factory presets, no audio input.
 - No phaser feedback (AGENTS.md says why).
 - `StoatworksAbout.h` and `ATTRIBUTIONS.md` are provisional hand copies in the shape
   the backend's syncs generate; register the project and re-sync before release.

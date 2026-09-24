@@ -137,7 +137,26 @@ through the harness's `--pipe`. No Windows build has run. How 25 controls read
 in Arena's inspector is untested. **No phaser feedback**: a swept-coefficient
 loop has no bound of the kind the window rests on, and the exact alternative
 is a serial pass over millions of samples (`AGENTS.md`). No OpenFX port, no
-browser demo, no user guide.
+user guide.
+
+## Browser demo
+
+[databend-demo.stoatworks-labs.com](https://databend-demo.stoatworks-labs.com/) runs
+the plugin's own seven passes in WebGL2 on generated clips, with every control the
+plugin declares. The ten shader bodies are copied unedited and
+`demo/tools/check_shaders.py` (run by `tools/verify.sh`) fails if a character drifts;
+the CPU half — the control laws in `Controls.cpp`, the echo's tap count and the
+phaser's window bound in `Model.h`, the per-frame arithmetic in `Databend.cpp` — is
+a hand port to JavaScript, and nothing checks a port but a reader (the port does
+reproduce `dbtest --window`'s whole table and the 207-sample default). The four
+integer controls are dropdowns there, because the kit has no integer type. On the
+same 960×540 colour-bars frame the page and `dbtest --pipe` agree on every pixel
+exactly with the echo, the export and the layouts (Planar, Interleaved + Wrap,
+16-bit signed + Columns + 5 samples of padding) and within 1/255 with the pitch
+shifter on — measured once, 2026-09-24, SwiftShader against Metal GL, with the
+flanger and phaser off because their LFO phase rides on a frame counter the two
+do not share. The page says on its face what it is not. `demo/vendor/` is the shared kit from
+`stoatworks-backend/resolume-demo`; a push to main redeploys the Worker.
 
 ## Build
 
@@ -167,6 +186,7 @@ The offline harness renders the real plugin class headlessly:
 ./build/dbtest --offline                               # what needs no GL (CI)
 ./build/dbtest --bench                                 # 720p, 1080p and 4K
 python3 tools/sweep.py                                 # no control is silently dead
+python3 demo/tools/check_shaders.py                    # the browser demo's shaders are the plugin's
 tools/verify.sh                                        # all of it, on a fresh universal build
 ```
 
