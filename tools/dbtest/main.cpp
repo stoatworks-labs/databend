@@ -1250,12 +1250,9 @@ int runAllpass( int W, int H, int perturb = 0, bool quiet = false )
 		for( size_t n = 0; n < x.size(); ++n )
 			worst = std::max( worst, std::fabs( got[ n ] - y[ n ] ) );
 		const double tol = code / 2.0 + 32.0 * kU * std::sqrt( static_cast< double >( window + model::kChunk ) );
-		const bool refOk = worst <= tol && chosen.phaserWindow == window;
-		failures += report( refOk, quiet, "allpass %2d stages, reference: %zu samples, worst %.3g against the serial double cascade (tolerance %.3g: half a code %.3g + float); the plugin's window %d, stated %d",
-		                    stages, x.size(), worst, tol, code / 2.0, chosen.phaserWindow, window );
 
-		//The slack, for the record: the same error at fractions of the
-		//window, on the perturbed plugin -- not pass/fail.
+		//The slack, for the record, before the verdict: the same error at a
+		//quarter of the window, on the perturbed plugin -- not pass/fail.
 		if( !quiet && perturb == 0 )
 		{
 			std::vector< float > shortOut;
@@ -1268,6 +1265,9 @@ int runAllpass( int W, int H, int perturb = 0, bool quiet = false )
 				std::printf( "   (at a quarter of the window, %d samples, the worst is %.3g: %.0f tolerances)\n", std::max( 1, window / 4 ), w4, w4 / tol );
 			}
 		}
+		const bool refOk = worst <= tol && chosen.phaserWindow == window;
+		failures += report( refOk, quiet, "allpass %2d stages, reference: %zu samples, worst %.3g against the serial double cascade (tolerance %.3g: half a code %.3g + float); the plugin's window %d, stated %d",
+		                    stages, x.size(), worst, tol, code / 2.0, chosen.phaserWindow, window );
 	}
 	return failures;
 }
