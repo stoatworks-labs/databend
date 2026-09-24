@@ -320,9 +320,9 @@ before and after.
   pass it.
 - **`--fail-render-at N`** is a harness-only hook so `verify.sh` can prove
   `--pipe` exits 1 on a failed render.
-- **About and attributions are provisional hand copies** in the shape the
-  backend's syncs generate, with `guide=""` (no user guide), as graticule did:
-  three About buttons, so `--list` shows 29 parameters.
+- **About and attributions were provisional hand copies** until registration;
+  they are generated now (`sync-about.py`, `sync-attributions.py`), and the
+  User guide button makes four About buttons, so `--list` shows 30 parameters.
 - **The FFGL submodule was dissociated from the reference clone** so this repo
   does not depend on a path in `~/Projects`.
 
@@ -385,15 +385,18 @@ Release build, at 320×180 and 1280×720.
 
 ### Assumed, or not done
 
-- ☠️ **Never loaded into Resolume**, on either platform. Everything was
-  compiled, rendered and measured offline against the real plugin class in a
-  headless CGL context, plus an `oxbow` load.
-- **No Windows build has run.** CI is adapted from slope's and cannot run yet.
+- ☠️ **Never loaded into Resolume on macOS.** Everything was compiled, rendered
+  and measured offline against the real plugin class in a headless CGL context,
+  plus an `oxbow` load.
+- On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU, 2026-09-24): this release's DLL loads from Extra Effects, registers as `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and Arena's log stays clean: 9 of the fleet gate's 9 checks, with 21 of the 26 controls moving the picture (ten under a precondition) and five inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every frame, so the gate's noise floor covers them; the harness measures each against its closed form). Software rendering says nothing about a GPU or about speed.
+- **Windows** is built by CI (release.yml; the first run compiled clean on MSVC
+  because `kPi`, `<cmath>` and the `far`/`near` rename were in from the start).
 - **Footage has only been seen through `--pipe`** — twelve demo clips, one frame
   each, at two rasters, for the defaults. Nothing has been through a show.
 - **Not verified at 4K**, only benchmarked there.
 - **The float part of the `--allpass` tolerances is a model**, said above.
-- **No OpenFX port, no user guide, no factory presets.** The browser demo's CPU
+- **No OpenFX port, no factory presets.** There is a user guide (`docs/USER-GUIDE.md`,
+  built to the site by the website's `build_guides.py`). The browser demo's CPU
   half is a port that only a reader checks; its shaders are held to the C++ by
   `check_shaders.py`.
 

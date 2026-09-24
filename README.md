@@ -13,9 +13,10 @@
 > noise line's energy to 4e-8 of it and matches a serial double run of the
 > cascade within a bound it proves; an 8-bit file wraps past full scale, a
 > 16-bit one wraps, a float one clips, exactly — with seven negative controls
-> that prove each check can fail. It has **never been loaded into Resolume**. It
-> is loaded by [oxbow](https://github.com/stoatworks-labs/oxbow), which is a real
-> FFGL host and is not Resolume. See [Status](#status).
+> that prove each check can fail. It has **never been loaded into Resolume on
+> macOS**. There it is loaded by [oxbow](https://github.com/stoatworks-labs/oxbow),
+> which is a real FFGL host and is not Resolume. On Windows it has run in
+> Resolume Arena 7.27.1, on software rendering. See [Status](#status).
 
 The raster as a PCM stream through audio effects, as an FFGL effect for
 [Resolume](https://resolume.com) Arena and Avenue.
@@ -26,6 +27,16 @@ The raster as a PCM stream through audio effects, as an FFGL effect for
 Resolume. Interleaved, 8-bit, Wrap; an echo four lines and 61 samples down at
 0.6 feedback. Every colour in it is a red, green or blue sample that came back
 in the wrong slot.</sub>
+
+[![Databend — the frame as a sample stream through audio effects, for Resolume](docs/video-thumb.png)](https://www.youtube.com/watch?v=BnS958HtCHY)
+
+*[Watch it](https://www.youtube.com/watch?v=BnS958HtCHY) — 57 seconds:
+an echo train marching on a slant and steepening with more samples per delay, Line Padding
+leaning it, an interleaved file's ghosts in the wrong colours at 61 samples and the right ones
+at 60, the flanger's comb across the scanlines, the phaser's smear parting the planes, 8-bit
+Wrap and Clip and a 16-bit file's pastel wraps, the pitch shifter from half to double, and
+Columns turning the echo before Mix goes back to the clip. Rendered by the plugin's own harness
+over Resolume's bundled demo clips, not captured from Resolume.*
 
 ## The one idea
 
@@ -108,7 +119,7 @@ fresh universal build, at **320×180 and 1280×720**:
 | `--pitch` | bars of period 16 come out with period 32 at Ratio 1/2 and 8 at Ratio 2 (autocorrelation ≥ 0.88 of R(0) at the period, ≤ −0.94 at the half period), 16 bypassed |
 | `--negative` | seven perturbed plugins — the stride ignoring padding, a flat echo gain, an interleaved stream laid out planar, a frozen LFO, the window cut to a quarter, an integer format that never wraps, a pitch shifter reading at 1/r — each **fails** its check |
 | mutation | one character of the shipped echo shader (`n - k * Delay` → `n + k * Delay`) failed 17 of 25 checks at both rasters, then reverted |
-| `--laws`, `--names`, `--window` | every control law at 21 points; the dyadic promises; 29 names unique and within 16 characters, the host reads `SW Databend` / `DB01` / effect; the phaser's window is 207 at the defaults and at most 682 over the whole control range (limit 1024) |
+| `--laws`, `--names`, `--window` | every control law at 21 points; the dyadic promises; 30 names unique and within 16 characters, the host reads `SW Databend` / `DB01` / effect; the phaser's window is 207 at the defaults and at most 682 over the whole control range (limit 1024) |
 | `tools/sweep.py` | all **25** controls measurably change the picture |
 | shaders | all 8, as the plugin compiles them, through `glslc` |
 | `--pipe` | 2.5 frames in, exactly 2 out; an unknown cue refused (2); a failed render and a closed stdout (`\| head -c 1`) each exit 1 |
@@ -130,14 +141,15 @@ the mechanism and both are one click away; the defaults are Planar and Clip.
 
 ### Not established
 
-It has **never been loaded into Resolume**, on either platform. Everything
-above was compiled, rendered and measured offline against the real plugin class
-in a headless CGL context, plus an `oxbow` load. Footage has only been seen
-through the harness's `--pipe`. No Windows build has run. How 25 controls read
-in Arena's inspector is untested. **No phaser feedback**: a swept-coefficient
+It has **never been loaded into Resolume on macOS**. Everything above was
+compiled, rendered and measured offline against the real plugin class in a
+headless CGL context, plus an `oxbow` load. On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU, 2026-09-24): this release's DLL loads from Extra Effects, registers as `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and Arena's log stays clean: 9 of the fleet gate's 9 checks, with 21 of the 26 controls moving the picture (ten under a precondition) and five inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every frame, so the gate's noise floor covers them; the harness measures each against its closed form). Software rendering says nothing about a GPU or about speed.
+Footage has been seen through the harness's `--pipe` (twelve demo clips at two
+rasters, and the release video). **No phaser feedback**: a swept-coefficient
 loop has no bound of the kind the window rests on, and the exact alternative
-is a serial pass over millions of samples (`AGENTS.md`). No OpenFX port, no
-user guide.
+is a serial pass over millions of samples (`AGENTS.md`). No OpenFX port and no
+presets. There is a [user guide](https://stoatworks-labs.com/software/databend/guide/),
+and the browser demo below.
 
 ## Browser demo
 
