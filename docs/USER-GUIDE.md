@@ -31,8 +31,8 @@ came back in the wrong slot.*
 > - in an interleaved file a delay of 1 mod 3 puts red's echo in green, green's in blue and
 >   blue's in the next pixel's red;
 > - the flanger's ghost on every line sits where the LFO says at that line's stream time;
-> - the phaser keeps a noise picture's energy to 4 × 10⁻⁴ of it and matches a serial double run
->   of the cascade within a bound it proves;
+> - the phaser keeps a noise picture's energy to 4 × 10⁻⁸ of it at 320×180 and 10⁻⁷ at
+>   1280×720, and matches a serial double run of the cascade within a bound it proves;
 > - an 8-bit file wraps past full scale, a 16-bit one wraps and a float one clips, exactly.
 >
 > Seven faults put in on purpose are shown to make those checks fail, and all 25 controls are
@@ -42,12 +42,12 @@ came back in the wrong slot.*
 > fleet's own test host, `oxbow`, for 120 frames. On Windows, in Resolume Arena 7.27.1 (win-lab,
 > Mesa llvmpipe, no GPU, 2026-09-24), this release's DLL loads from Extra Effects, registers as
 > `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and
-> Arena's log stays clean. That's 9 of the fleet gate's 9 checks, with 21 of the 26 controls
-> moving the picture (ten under a precondition) and five inconclusive on the gate's single
-> frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every
-> frame, so the gate's noise floor covers them; the harness measures each against its closed
-> form). Software rendering says nothing about a GPU or about speed. Try it on a spare layer
-> before you put it in a show.
+> Arena's log stays clean. That's 9 of the fleet gate's 9 checks, with 21 of the 26 controls it
+> measures (the plugin's 25 and Arena's own Opacity) moving the picture (ten under a
+> precondition) and five inconclusive on the gate's single frames (Rate, Depth, Flanger On,
+> Phaser Rate and Line Padding: the LFOs' phase advances every frame, so the gate's noise floor
+> covers them; the harness measures each against its closed form). Software rendering says
+> nothing about a GPU or about speed. Try it on a spare layer before you put it in a show.
 >
 > This codebase was created with AI assistance, directed and reviewed by a human author.
 

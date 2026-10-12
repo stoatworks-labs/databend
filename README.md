@@ -9,7 +9,8 @@
 > to **zero** error; the nth echo sits at n·(k, 1) with amplitude m gⁿ; in an
 > interleaved file a delay ≡ 1 (mod 3) puts red's echo in green, green's in blue and
 > blue's in the next pixel's red; the flanger's ghost sits where the LFO says on
-> every line; the phaser keeps a noise line's energy to 4e-8 of it; and the formats wrap
+> every line; the phaser keeps a noise line's energy to 4e-8 of it at 320×180 and
+> 1e-7 at 1280×720; and the formats wrap
 > and clip where they should. Seven negative controls prove each check can fail. It
 > has **never been loaded into Resolume on macOS**. There it's loaded by
 > [oxbow](https://github.com/stoatworks-labs/oxbow), which is a real FFGL host but
@@ -182,7 +183,8 @@ On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU,
 2026-09-24), this release's DLL loads from Extra Effects, registers as
 `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it
 renders and Arena's log stays clean. That's 9 of the fleet gate's 9 checks, with
-21 of the 26 controls moving the picture (ten under a precondition) and five
+21 of the 26 controls it measures (the plugin's 25 and Arena's own Opacity)
+moving the picture (ten under a precondition) and five
 inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and
 Line Padding: the LFOs' phase advances every frame, so the gate's noise floor
 covers them; the harness measures each against its closed form). Software
