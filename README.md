@@ -1,42 +1,42 @@
 # databend
 
 > **AI-assisted project.** This codebase was created with [Claude](https://claude.com/claude-code)
-> (Anthropic), directed and reviewed by a human author. The effects are not
-> asserted but measured: an offline harness drives the real plugin class in a
-> headless GL context and reads each claim back out of the picture it made —
-> an echo of a line and k samples lands one line down and k across, and moves
-> with the row stride when the file has padding, with the whole picture matching
-> the closed form to **zero** error; the nth echo sits at n·(k, 1) with amplitude
-> m gⁿ; in an interleaved file a delay ≡ 1 (mod 3) puts red's echo in green,
-> green's in blue and blue's in the next pixel's red; the flanger's ghost on every
-> line sits where the LFO says at that line's stream time; the phaser keeps a
-> noise line's energy to 4e-8 of it and matches a serial double run of the
-> cascade within a bound it proves; an 8-bit file wraps past full scale, a
-> 16-bit one wraps, a float one clips, exactly — with seven negative controls
-> that prove each check can fail. It has **never been loaded into Resolume on
-> macOS**. There it is loaded by [oxbow](https://github.com/stoatworks-labs/oxbow),
-> which is a real FFGL host and is not Resolume. On Windows it has run in
-> Resolume Arena 7.27.1, on software rendering. See [Status](#status).
+> (Anthropic), directed and reviewed by a human author. The effects are measured
+> rather than taken on trust: an offline harness drives the real plugin class in a
+> headless GL context and reads each claim back out of the picture it made. An echo
+> of a line and k samples lands one line down and k across, and moves with the row
+> stride when the file has padding, with the whole picture matching the closed form
+> to **zero** error; the nth echo sits at n·(k, 1) with amplitude m gⁿ; in an
+> interleaved file a delay ≡ 1 (mod 3) puts red's echo in green, green's in blue and
+> blue's in the next pixel's red; the flanger's ghost sits where the LFO says on
+> every line; the phaser keeps a noise line's energy to 4e-8 of it; and the formats wrap
+> and clip where they should. Seven negative controls prove each check can fail. It
+> has **never been loaded into Resolume on macOS**. There it's loaded by
+> [oxbow](https://github.com/stoatworks-labs/oxbow), which is a real FFGL host but
+> isn't Resolume. On Windows it has run in Resolume Arena 7.27.1, on software
+> rendering. See [Status](#status).
 
-The raster as a PCM stream through audio effects, as an FFGL effect for
-[Resolume](https://resolume.com) Arena and Avenue.
+Databending, live, for [Resolume](https://resolume.com) Arena and Avenue: an FFGL
+effect that treats the raster as a PCM stream and runs it through audio effects. It's
+the old glitch-art trick of loading a picture into an audio editor and putting an
+echo on it, except it happens to your clip while it plays.
 
 ![Colour bars through an interleaved 8-bit stream that wraps: every bar's hue rotated by an echo that lands one channel over, the ramp folding back to black past full scale, comb lines from the flanger, ringing from the phaser on the moving bar](docs/hero.png)
 
-<sub>One frame, rendered by `dbtest`, the offline harness — not captured from
+<sub>One frame, rendered by `dbtest`, the offline harness, rather than captured from
 Resolume. Interleaved, 8-bit, Wrap; an echo four lines and 61 samples down at
 0.6 feedback. Every colour in it is a red, green or blue sample that came back
 in the wrong slot.</sub>
 
 [![Databend — the frame as a sample stream through audio effects, for Resolume](docs/video-thumb.png)](https://www.youtube.com/watch?v=BnS958HtCHY)
 
-*[Watch it](https://www.youtube.com/watch?v=BnS958HtCHY) — 57 seconds:
+*[Watch it](https://www.youtube.com/watch?v=BnS958HtCHY) (57 seconds):
 an echo train marching on a slant and steepening with more samples per delay, Line Padding
 leaning it, an interleaved file's ghosts in the wrong colours at 61 samples and the right ones
 at 60, the flanger's comb across the scanlines, the phaser's smear parting the planes, 8-bit
 Wrap and Clip and a 16-bit file's pastel wraps, the pitch shifter from half to double, and
 Columns turning the echo before Mix goes back to the clip. Rendered by the plugin's own harness
-over Resolume's bundled demo clips, not captured from Resolume.*
+over Resolume's bundled demo clips rather than captured from Resolume.*
 
 <!-- downloads:start -->
 
@@ -73,18 +73,18 @@ macOS builds are signed and notarised and open normally. The Windows builds are 
 ## The one idea
 
 Databending is opening a picture in an audio editor and running audio effects
-on it. The editor does not see a picture. It sees **one long stream of samples
-in the order the file lays them out** — row by row, one plane after another or
-R, G, B per pixel, with a row stride that may carry padding — and a delay-line
-effect on that stream does not know where the lines are.
+on it. The editor doesn't see a picture. It sees **one long stream of samples
+in the order the file lays them out** (row by row, one plane after another or
+R, G, B per pixel, with a row stride that may carry padding), and a delay-line
+effect on that stream has no idea where the lines are.
 
-Model that stream exactly, and run real delay-line effects on it. Everything
-falls out of the layout; nothing is drawn:
+So databend models that stream exactly and runs proper delay-line effects on it.
+Everything falls out of the layout, and nothing is drawn:
 
 - **An echo** of D = k·L + m samples (L the line length in samples) comes back k
   lines down and m samples across. With feedback the echoes march down the
   picture on a slant, each one m gᵏ as bright as the last.
-- **A flanger** is a delay swept by an LFO in stream time — and stream time *is*
+- **A flanger** is a delay swept by an LFO in stream time, and stream time *is*
   the scan, so the ghost's offset changes line by line: a comb across the
   scanlines.
 - **A phaser** is a cascade of all-pass stages whose coefficient the LFO sweeps.
@@ -95,11 +95,11 @@ falls out of the layout; nothing is drawn:
   grain the line is stretched, at the seam it repeats or skips.
 
 **The file layout is part of the mechanism.** In an interleaved RGB stream a
-delay that is not a multiple of three lands one channel's samples in another's
-slot, so the echo comes back in the wrong colour — and every effect rotates
+delay that isn't a multiple of three lands one channel's samples in another's
+slot, so the echo comes back in the wrong colour, and every effect rotates
 hue, because the hue lives at the stream's period-3 frequency. In a planar
-stream it does not, but a delay past a plane's start reads the previous plane:
-the first lines of green carry echoes of the last lines of red. And the sample
+stream it doesn't, but a delay past a plane's start reads the previous plane,
+so the first lines of green carry echoes of the last lines of red. And the sample
 format decides what happens past full scale: an 8-bit unsigned file **wraps**
 (the harsh databend look) or clips, a float file clips; an unsigned file's
 silence is black, a signed one's is mid-grey.
@@ -160,27 +160,39 @@ fresh universal build, at **320×180 and 1280×720**:
 Render cost at the defaults, best of three runs of 60 frames after a warm-up,
 `glFinish` both sides, on a GPU shared with other builds: **2.9 ms** at 720p,
 **5.8 ms** at 1080p, **18.7 ms** at 4K; with the pitch shifter on as well, 2.9 /
-5.0 / 21.9. The phaser's restart window is where the time goes — 207 samples
-re-run once per 16-sample chunk at the defaults, from a bound that is
-rigorous and about twice as long as the error needs — so 4K is not real time
-with the phaser on. macOS figures only.
+5.0 / 21.9. The phaser's restart window is where the time goes (207 samples
+re-run once per 16-sample chunk at the defaults, from a bound that's rigorous
+and about twice as long as the error needs), so 4K isn't real time with the
+phaser on. macOS figures only.
 
-The defaults were judged on twelve of Resolume's bundled demo clips through
-the harness's `--pipe`: with Wrap, every phaser overshoot past full scale
+I chose the defaults by watching twelve of Resolume's bundled demo clips through
+the harness's `--pipe`. With Wrap, every phaser overshoot past full scale
 wrapped and eight of twelve clips flooded; with Interleaved every clip went
 pink, because every effect rotates the hue of an interleaved stream. Both are
-the mechanism and both are one click away; the defaults are Planar and Clip.
+the mechanism doing its job, and both are one click away if that's the look you
+want, but the defaults are Planar and Clip.
 
 ### Not established
 
 It has **never been loaded into Resolume on macOS**. Everything above was
 compiled, rendered and measured offline against the real plugin class in a
-headless CGL context, plus an `oxbow` load. On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU, 2026-09-24): this release's DLL loads from Extra Effects, registers as `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and Arena's log stays clean: 9 of the fleet gate's 9 checks, with 21 of the 26 controls moving the picture (ten under a precondition) and five inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every frame, so the gate's noise floor covers them; the harness measures each against its closed form). Software rendering says nothing about a GPU or about speed.
-Footage has been seen through the harness's `--pipe` (twelve demo clips at two
-rasters, and the release video). **No phaser feedback**: a swept-coefficient
+headless CGL context, plus an `oxbow` load.
+
+On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU,
+2026-09-24), this release's DLL loads from Extra Effects, registers as
+`SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it
+renders and Arena's log stays clean. That's 9 of the fleet gate's 9 checks, with
+21 of the 26 controls moving the picture (ten under a precondition) and five
+inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and
+Line Padding: the LFOs' phase advances every frame, so the gate's noise floor
+covers them; the harness measures each against its closed form). Software
+rendering says nothing about a GPU or about speed.
+
+Footage has been seen through the harness's `--pipe` (twelve demo clips at
+two rasters, and the release video). **No phaser feedback**: a swept-coefficient
 loop has no bound of the kind the window rests on, and the exact alternative
 is a serial pass over millions of samples (`AGENTS.md`). No OpenFX port and no
-presets. There is a [user guide](https://stoatworks-labs.com/software/databend/guide/),
+presets. There's a [user guide](https://stoatworks-labs.com/software/databend/guide/),
 and the browser demo below.
 
 ## Browser demo
@@ -188,18 +200,19 @@ and the browser demo below.
 [databend-demo.stoatworks-labs.com](https://databend-demo.stoatworks-labs.com/) runs
 the plugin's own seven passes in WebGL2 on generated clips, with every control the
 plugin declares. The ten shader bodies are copied unedited and
-`demo/tools/check_shaders.py` (run by `tools/verify.sh`) fails if a character drifts;
-the CPU half — the control laws in `Controls.cpp`, the echo's tap count and the
-phaser's window bound in `Model.h`, the per-frame arithmetic in `Databend.cpp` — is
-a hand port to JavaScript, and nothing checks a port but a reader (the port does
-reproduce `dbtest --window`'s whole table and the 207-sample default). The four
-integer controls are dropdowns there, because the kit has no integer type. On the
-same 960×540 colour-bars frame the page and `dbtest --pipe` agree on every pixel
-exactly with the echo, the export and the layouts (Planar, Interleaved + Wrap,
-16-bit signed + Columns + 5 samples of padding) and within 1/255 with the pitch
-shifter on — measured once, 2026-09-24, SwiftShader against Metal GL, with the
-flanger and phaser off because their LFO phase rides on a frame counter the two
-do not share. The page says on its face what it is not. `demo/vendor/` is the shared kit from
+`demo/tools/check_shaders.py` (run by `tools/verify.sh`) fails if a character drifts.
+The CPU half (the control laws in `Controls.cpp`, the echo's tap count and the
+phaser's window bound in `Model.h`, the per-frame arithmetic in `Databend.cpp`) is
+a hand port to JavaScript, and the only check on a port is someone reading it,
+though it does reproduce `dbtest --window`'s whole table and the 207-sample
+default. The four integer controls are dropdowns there, because the kit has no
+integer type. On the same 960×540 colour-bars frame the page and `dbtest --pipe`
+agree on every pixel exactly with the echo, the export and the layouts (Planar,
+Interleaved + Wrap, 16-bit signed + Columns + 5 samples of padding) and within
+1/255 with the pitch shifter on. That was measured once, on 2026-09-24,
+SwiftShader against Metal GL, with the flanger and phaser off because their LFO
+phase rides on a frame counter the two don't share. The page says on its face
+what it isn't. `demo/vendor/` is the shared kit from
 `stoatworks-backend/resolume-demo`; a push to main redeploys the Worker.
 
 ## Build
@@ -215,7 +228,7 @@ cmake --install build     # into ~/Documents/Resolume Arena/Extra Effects
 ```
 
 macOS builds are universal (Apple Silicon + Intel) by default; add
-`-DCMAKE_OSX_ARCHITECTURES=arm64` for a faster dev build. Windows needs GLEW via vcpkg.
+`-DCMAKE_OSX_ARCHITECTURES=arm64` for a quicker dev build. Windows needs GLEW via vcpkg.
 
 ## Building and testing
 

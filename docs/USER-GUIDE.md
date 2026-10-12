@@ -1,38 +1,53 @@
 # Databend user guide
 
-Databend is **the frame as a sample stream through audio effects, for [Resolume](https://resolume.com)
-Arena and Avenue**, as an FFGL effect. It is not a glitch filter with a list of looks. It does
-what an audio editor does when you open a picture in it: it reads the frame as one long stream
-of samples in the order the file lays them out, row by row, one plane after another or R, G, B
-per pixel, with a row stride that may carry padding, and runs real delay-line effects on that
-stream — echo, flanger, phaser, pitch shift — in the order the editor would, then exports the
-stream back to pixels through a sample format that wraps or clips past full scale. The echo
-that marches down the picture on a slant, the comb across the scanlines, the smear that keeps
-its energy, the ghost that comes back in the wrong colour: every one is what the stream does,
-not what somebody drew.
+Databend is an FFGL effect for [Resolume](https://resolume.com) Arena and Avenue that reads the
+frame as one long stream of audio samples, the way an audio editor does when you open a picture
+in it, and runs an echo, a flanger, a phaser and a pitch shifter over it before exporting the
+stream back to pixels.
+
+There's no list of looks to pick from. The stream follows the order the file lays the samples
+out (row by row, one plane after another or R, G, B per pixel, with a row stride that may carry
+padding), the delay-line effects run in the order the editor would run them, and the export
+goes through a sample format that wraps or clips past full scale. The echo that marches down
+the picture on a slant, the comb across the scanlines, the smear that keeps its energy, the
+ghost that comes back in the wrong colour: every one of them is what the stream does rather than
+something somebody drew.
 
 ![Colour bars through an interleaved 8-bit stream that wraps: every bar's hue rotated by an echo that lands one channel over, the ramp folding back to black past full scale, comb lines from the flanger, ringing from the phaser on the moving bar](hero.png)
 
 *The repo's test card through the plugin, rendered by the offline harness rather than captured
-from Resolume: Interleaved, 8-bit, Wrap, an echo four lines and 61 samples down at 0.6 feedback —
-off the defaults, because the defaults keep colour. Every colour in it is a red, green or blue
-sample that came back in the wrong slot.*
+from Resolume: Interleaved, 8-bit, Wrap, an echo four lines and 61 samples down at 0.6 feedback
+(not the defaults, which keep colour). Every colour in it is a red, green or blue sample that
+came back in the wrong slot.*
 
-> **Before you rely on this:** released at **v0.1.0**, and honestly early. The effects are
-> measured rather than asserted, by a harness that drives the real plugin class and reads each
-> claim back out of the picture it made, at two rasters: an echo of one line and k samples lands
-> one line down and k across, and moves with the row stride when the file has padding, with the
-> whole picture matching the closed form to zero error; the nth echo sits at n·(k, 1) with
-> amplitude m·gⁿ; in an interleaved file a delay of 1 mod 3 puts red's echo in green, green's in
-> blue and blue's in the next pixel's red; the flanger's ghost on every line sits where the LFO
-> says at that line's stream time; the phaser keeps a noise picture's energy to 4 × 10⁻⁴ of it
-> and matches a serial double run of the cascade within a bound it proves; an 8-bit file wraps
-> past full scale, a 16-bit one wraps, a float one clips, exactly; and seven deliberate faults
-> are shown to make those checks fail. All 25 controls are shown to change the picture. It has
-> **never been loaded into Resolume on macOS** — the one host it has run in is the fleet's own
-> test host, `oxbow`, for 120 frames.
-> On Windows, in Resolume Arena 7.27.1 (win-lab, Mesa llvmpipe, no GPU, 2026-09-24): this release's DLL loads from Extra Effects, registers as `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and Arena's log stays clean: 9 of the fleet gate's 9 checks, with 21 of the 26 controls moving the picture (ten under a precondition) and five inconclusive on the gate's single frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every frame, so the gate's noise floor covers them; the harness measures each against its closed form). Software rendering says nothing about a GPU or about speed.
-> Try it on a spare layer before you put it in a show.
+> **Before you rely on this:** it's at **v0.1.0**, and still early days. The effects are
+> measured rather than taken on trust, by a harness that drives the real plugin class and reads
+> each claim back out of the picture it made, at two rasters. It shows that:
+>
+> - an echo of one line and k samples lands one line down and k across, and moves with the row
+>   stride when the file has padding, with the whole picture matching the closed form to zero
+>   error;
+> - the nth echo sits at n·(k, 1) with amplitude m·gⁿ;
+> - in an interleaved file a delay of 1 mod 3 puts red's echo in green, green's in blue and
+>   blue's in the next pixel's red;
+> - the flanger's ghost on every line sits where the LFO says at that line's stream time;
+> - the phaser keeps a noise picture's energy to 4 × 10⁻⁴ of it and matches a serial double run
+>   of the cascade within a bound it proves;
+> - an 8-bit file wraps past full scale, a 16-bit one wraps and a float one clips, exactly.
+>
+> Seven faults put in on purpose are shown to make those checks fail, and all 25 controls are
+> shown to change the picture.
+>
+> It has **never been loaded into Resolume on macOS**: the one host it's run in on a Mac is the
+> fleet's own test host, `oxbow`, for 120 frames. On Windows, in Resolume Arena 7.27.1 (win-lab,
+> Mesa llvmpipe, no GPU, 2026-09-24), this release's DLL loads from Extra Effects, registers as
+> `SW Databend` / `DB01` / effect, all 31 host controls match the declaration, it renders and
+> Arena's log stays clean. That's 9 of the fleet gate's 9 checks, with 21 of the 26 controls
+> moving the picture (ten under a precondition) and five inconclusive on the gate's single
+> frames (Rate, Depth, Flanger On, Phaser Rate and Line Padding: the LFOs' phase advances every
+> frame, so the gate's noise floor covers them; the harness measures each against its closed
+> form). Software rendering says nothing about a GPU or about speed. Try it on a spare layer
+> before you put it in a show.
 >
 > This codebase was created with AI assistance, directed and reviewed by a human author.
 
@@ -40,7 +55,7 @@ sample that came back in the wrong slot.*
 
 ## Installing
 
-Every download carries one effect, **SW Databend**. Drop it into Resolume's effects folder
+Every download has one effect in it, **SW Databend**. Drop it into Resolume's effects folder
 and restart Resolume:
 
 ```
@@ -48,12 +63,12 @@ macOS    ~/Documents/Resolume Arena/Extra Effects/
 Windows  %USERPROFILE%\Documents\Resolume Arena\Extra Effects\
 ```
 
-Avenue uses the same layout under its own folder name. The effect then appears in the effects
+Avenue uses the same layout under its own folder name. The effect then shows up in the effects
 browser as **SW Databend**.
 
 The macOS download is a universal build (Apple silicon and Intel), as a `.dmg` or a `.zip`.
-It is **Developer ID-signed and notarised**, so the bundle simply loads. The Windows download is
-an x64 installer or a `.zip`. It is not code-signed, so the installer trips SmartScreen once:
+It's Developer ID-signed and notarised, so the bundle just loads. The Windows download is
+an x64 installer or a `.zip`. It isn't code-signed, so the installer trips SmartScreen once:
 **More info** → **Run anyway**.
 
 ---
@@ -75,15 +90,15 @@ that file, in a fixed order, each with a bypass:
 The stream's arithmetic is what makes the picture. An echo of D samples on a stream with L
 samples a line comes back ⌊D / L⌋ lines down and D mod L samples across, so `Delay Lines` and
 `Delay Samples` are the delay in the file's own units, and `Line Padding` changes L without
-changing the picture's width — every echo lands further across. In an Interleaved stream each
-pixel is three samples, so a delay that is not a multiple of three lands red's samples in
+changing the picture's width, so every echo lands further across. In an Interleaved stream each
+pixel is three samples, so a delay that isn't a multiple of three lands red's samples in
 green's slot; and because hue lives at the stream's period-3 frequency, *every* effect on an
 interleaved stream rotates hue. In a Planar stream the three planes follow one another, so a
 delay past a plane's start reads the previous plane: the first lines of green carry echoes of
 the last lines of red, and each plane sits at a different stream time under the LFOs, which is
 why the phaser and flanger part the colours.
 
-The format is the last word. An 8-bit unsigned file's silence is black and its samples run 0
+The format gets the last word. An 8-bit unsigned file's silence is black and its samples run 0
 to 1; a 16-bit signed file's and a float file's silence is mid-grey and their samples run −1 to
 1, so black is full negative. Past full scale an integer file **wraps** to the other end of its
 range or **clips**; a float file clips.
@@ -128,9 +143,9 @@ control, and the Output Mix crossfades the whole result with the untouched clip.
 **Layout** — **Planar** or **Interleaved**; **Planar by default**. Planar is all of red, then
 all of green, then all of blue, each plane line by line; a delay past a plane's start reads the
 previous plane. Interleaved is red, green, blue per pixel, three samples a pixel, so a line is
-3 Lp + p samples; a delay that is not a multiple of three lands one channel's samples in
-another's slot, and every effect rotates hue. Interleaved is the signature look and it is one
-click away; it is not the default because it turns every clip pink.
+3 Lp + p samples; a delay that isn't a multiple of three lands one channel's samples in
+another's slot, and every effect rotates hue. Interleaved is the signature look and it's one
+click away; it isn't the default because it turns every clip pink.
 
 **Line Padding** — **0 to 255** samples, an integer; **0 by default**. Silence on the end of
 every line: the row stride the effects never see. It changes L, so a delay of `Delay Lines`
@@ -145,13 +160,13 @@ frame column by column, so everything the effects do across the line they do dow
 The zero point and the range: an unsigned file's silence is black and its samples run 0 to 1;
 a signed file's silence is mid-grey and its samples run −1 to 1, so black is full negative. In
 a signed format an echo sum of a black background overshoots the *bottom*: with Wrap it folds to
-bright pastels, with Clip (or in Float, which always clips) it stays black — a float file at
+bright pastels, with Clip (or in Float, which always clips) it stays black, so a float file at
 high echo feedback on a black-background clip is driven to black. The effects run in the
 editor's float domain; the format quantises and overflows once, on export.
 
 **Overflow** — **Wrap** or **Clip**; **Clip by default**. What an integer format does past full
 scale. Wrap folds the overshoot to the other end of the range (the harsh databend look); Clip
-holds it at the end. A float file clips whatever this says. Wrap is not the default because
+holds it at the end. A float file clips whatever this says. Wrap isn't the default because
 every phaser overshoot wraps and most of the demo clips flooded with fringes.
 
 ---
@@ -215,7 +230,7 @@ it sits at 0.9, at 1 it sweeps to 0. A pole near 0.9 delays smooth content most.
 **Phaser Mix** — **0 to 1**; **0.35 by default**. A crossfade; at 1 the picture is pure all-pass
 and keeps its energy exactly.
 
-There is **no phaser feedback**, on purpose. See Known limits.
+There's **no phaser feedback**, on purpose. See Known limits.
 
 ---
 
@@ -231,7 +246,7 @@ stretched inside each grain; above, squeezed, repeating at the seams. At 0.5 the
 grain length. A grain longer than a line straddles lines.
 
 **Pitch Mix** — **0 to 1**; **1 by default**. A crossfade. On a black background the two taps
-average content with black, so the picture dims at high mix; that is the crossfade, not a
+average content with black, so the picture dims at high mix; that's the crossfade, not a
 fault.
 
 ---
@@ -249,10 +264,10 @@ Once a frame, the stream pass writes the file into a float buffer, one texel a s
 effect that is on reads one stream buffer and writes the other (a bypassed effect is skipped,
 not copied); the display pass exports the last buffer to the format and puts it on the layer.
 Every coordinate is an integer computed in integers, every coefficient is computed in double
-on the CPU, and the LFOs are triangles of an integer counter, exact in float — which is what
+on the CPU, and the LFOs are triangles of an integer counter, exact in float, which is what
 lets the harness hold every effect to its closed form.
 
-The phaser is a recurrence over two to twenty-five million samples, which a GPU cannot run
+The phaser is a recurrence over two to twenty-five million samples, which a GPU can't run
 serially. It runs as a windowed restart: for each chunk of 16 samples a state pass re-runs the
 cascade from silence K samples earlier and writes its states; the main pass continues from
 that state for at most 16 steps. K comes from a proved bound on how fast a normalised lattice
@@ -282,8 +297,8 @@ after a warm-up, on a GPU shared with other work:
 | 3840 × 2160 | 18.7 ms | 21.9 ms |
 
 The phaser's restart window is the cost (207 samples re-run once per 16-sample chunk at the
-defaults, from a bound that is rigorous and about twice as long as the error needs), and it
-scales with the raster. **4K is not real time with the phaser on** (about 20 ms a frame, past a
+defaults, from a bound that's rigorous and about twice as long as the error needs), and it
+scales with the raster. **4K isn't real time with the phaser on** (about 20 ms a frame, past a
 60 fps frame's 16.7 ms); turn Phaser On off at 4K, or run the layer at 1080p. Everything else
 is a few taps a sample. macOS figures only; the Windows build has run on software rendering,
 which says nothing about speed.
@@ -293,18 +308,18 @@ which says nothing about speed.
 ## If it looks wrong
 
 **Everything has gone pink.** Layout is Interleaved. Every effect rotates the hue of an
-interleaved stream, because hue lives at its period-3 frequency. That is the mechanism; Planar
-keeps colour.
+interleaved stream, because hue lives at its period-3 frequency. That's the mechanism working;
+Planar keeps colour.
 
-**The picture is flooded with fringes.** Overflow is Wrap and something overshoots — the
-phaser does, at every edge. Clip, or lower the mix of whatever overshoots.
+**The picture is flooded with fringes.** Overflow is Wrap and something overshoots (the
+phaser does, at every edge). Clip, or lower the mix of whatever overshoots.
 
 **A signed format has gone grey, pastel or black.** In 16-bit signed and Float the silence is
-mid-grey and black is full negative, so a black background is not silence: an echo sum of it
+mid-grey and black is full negative, so a black background isn't silence: an echo sum of it
 overshoots the bottom, wrapping to pastels (16-bit, Wrap) or clipping to black (Float, or
 Clip). Use 8-bit unsigned for a dark clip, or lower Feedback and Echo Mix.
 
-**The echo does not land where the arithmetic says.** Check Line Padding: it changes the
+**The echo doesn't land where the arithmetic says.** Check Line Padding: it changes the
 stride, so a delay of k lines lands k × padding further across. And a delay past a line's end
 is a line down and the remainder across.
 
@@ -315,7 +330,7 @@ picture is the delayed stream alone, with no comb at all.
 average content with black. Lower Pitch Mix.
 
 **A faint tinted line at the top of the frame.** Planar: a delay past a plane's start reads the
-previous plane, so the first lines of green carry echoes of the last lines of red. It is what a
+previous plane, so the first lines of green carry echoes of the last lines of red. It's what a
 planar file does.
 
 **The first frame after a change looks different from the rest.** The LFOs carry their phase
@@ -333,22 +348,22 @@ Phaser On, Pitch On) or its group's mix is 0.
 - **Each frame is its own file** for the delay memories. Databending a video file as one
   stream would let an echo reach the previous frame; this plugin keeps no frame history.
 - **No phaser feedback.** A phaser's feedback returns the last stage to the first, and for a
-  swept coefficient there is no bound of the kind the restart window rests on — the error
-  iteration diverges for any useful amount — so the only exact form is a serial pass over
-  millions of samples, which a GPU cannot do in a frame. The control is left out rather than
+  swept coefficient there's no bound of the kind the restart window rests on (the error
+  iteration diverges for any useful amount), so the only exact form is a serial pass over
+  millions of samples, which a GPU can't do in a frame. The control is left out rather than
   shipped unproved.
 - **The all-pass sweep's top pole is fixed at 0.9**; Phaser Depth sets how far below it the
   sweep goes.
-- **The alpha channel is not part of the stream.** The file is RGB; the output alpha is the
+- **The alpha channel isn't part of the stream.** The file is RGB; the output alpha is the
   larger of the clip's and the exported pixel's brightest channel.
 - **The LFOs are triangles**, at a nominal 44.1 kHz, so their values are exact; a sine would
   be the usual choice.
-- **4K is not real time with the phaser on** (Performance).
+- **4K isn't real time with the phaser on** (Performance).
 - Footage has been seen through the harness's `--pipe` on Resolume's bundled demo clips, at
   two rasters, plus the release video. Nothing has been through a show.
-- No OpenFX port, no presets and no audio input. There is a browser demo at
+- No OpenFX port, no presets and no audio input. There's a browser demo at
   https://databend-demo.stoatworks-labs.com/, which runs the same shaders in WebGL with the
-  window bound and the tap count ported to JavaScript; its page says what it does not do.
+  window bound and the tap count ported to JavaScript; its page says what it doesn't do.
 
 ---
 
@@ -361,6 +376,6 @@ the work.
 ## Reporting something
 
 Open an issue at https://github.com/stoatworks-labs/databend/issues with the Resolume version,
-the platform, the layout and format you had set, and — if you can — the clip and the settings
+the platform, the layout and format you had set, and, if you can, the clip and the settings
 that show it. The harness's `dbtest --pipe` can reproduce any frame from a clip and a cue
 sheet, which is the fastest route to a fix.
